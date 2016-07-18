@@ -1,0 +1,28 @@
+@require(title, categories, site_url, wlog_url)
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>@{title}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="/main.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="k">
+
+<div class="head">
+<h2>wlog</h2>
+</div>
+<div class="head btn">
+[ <a href="@{site_url}">home</a> ] [ <a href="@{wlog_url}">wlog</a> ] //
+@for category in categories:
+[ <a href="@{wlog_url}cat/@{category}.html">@{category}</a> ]
+@endfor
+</div>
+
+@def content():
+@end
+@content()
+
+<div class="foot">web@@omaera.org</div>
+</div>
+</body>
+</html>
