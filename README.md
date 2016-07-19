@@ -22,4 +22,5 @@ Then just run nikki.py without arguments and your blog should be generated in th
 * Automatic copying of static files such as stylesheets and images
 * Pagination
 * Archive list
+* Error handling
 * Tags (maybe)
