@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -- coding: utf-8 --
 
 # Configuration
@@ -18,6 +18,7 @@ from wheezy.template.ext.core import CoreExtension
 from wheezy.template.loader import FileLoader
 
 MAIN_CATEGORIES = []
+_VERSION = "0.1"
 
 def parse_articles():
   articles = []
@@ -149,7 +150,7 @@ def render(outname, templatename, newcontext=None):
 def main():
   global MAIN_CATEGORIES
   
-  print("Starting.")
+  print("nikki v{}".format(_VERSION))
   start = time.clock()
   
   print("Parsing articles...")
