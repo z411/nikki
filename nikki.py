@@ -18,7 +18,7 @@ from wheezy.template.ext.core import CoreExtension
 from wheezy.template.loader import FileLoader
 
 MAIN_CATEGORIES = []
-_VERSION = "0.1"
+VERSION = "0.1"
 
 def parse_articles():
   articles = []
@@ -137,6 +137,7 @@ def render(outname, templatename, newcontext=None):
     'title': WLOG_TITLE,
     'wlog_url': WLOG_URL,
     'site_url': SITE_URL,
+    'version': VERSION,
     'categories': MAIN_CATEGORIES,
   }
   if newcontext:
@@ -150,7 +151,7 @@ def render(outname, templatename, newcontext=None):
 def main():
   global MAIN_CATEGORIES
   
-  print("nikki v{}".format(_VERSION))
+  print("nikki v{}".format(VERSION))
   start = time.clock()
   
   print("Parsing articles...")
