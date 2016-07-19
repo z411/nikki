@@ -160,6 +160,7 @@ def main():
   categories = split_categories(articles)
   MAIN_CATEGORIES = categories.keys()
   
+  mkdir("output")
   print("Rendering article pages...")
   for article in articles:
     generate_article(article)
