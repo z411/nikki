@@ -121,7 +121,10 @@ def generate_articles(articles, category=None):
   render(fname, 'articles.html', context)
   
 def mkdir(dirname):
-  os.makedirs(os.path.join('output', dirname), exist_ok=True)
+  try:
+    os.makedirs(os.path.join('output', dirname))
+  except OSError:
+    pass
   
 def render(outname, templatename, newcontext=None):
   engine = Engine(
@@ -140,8 +143,8 @@ def render(outname, templatename, newcontext=None):
   
   output = template.render(context)
   
-  with open("output/{}.html".format(outname), 'w', encoding='utf-8') as f:
-    f.write(output)
+  with open("output/{}.html".format(outname), 'w') as f:
+    f.write(output.encode('utf-8'))
 
 def main():
   global MAIN_CATEGORIES
