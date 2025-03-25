@@ -1,25 +1,28 @@
 ﻿@extends("master.html")
-@require(articles, wlog_url)
+@require(articles, categories, wlog_url)
 @def content():
 
+<div class="categories">
+[ <a href="@{wlog_url}/">all</a> ]
+@for category in categories:
+[ <a href="@{wlog_url}@{category}/">@{category}</a> ]
+@endfor
+</div>
+<hr>
+
 @for article in articles:
-<div class="article">
-<div class="articleh">
-@{article['date_str']}
+<article>
+<h1><a href="@{wlog_url}@{article['url']}">@{article['title']}</a></h1>
+<div class="tag">by z411 @ @{article['date_str']}
 @if article['category']:
-<span style="float:right">[ <a href="@{wlog_url}cat/@{article['category']}.html">@{article['category']}</a> ]</span>
+<span style="float:right">[ <a href="@{wlog_url}@{article['category']}/">@{article['category']}</a> ]</span>
 @endif
 </div>
-<div class="box">
-<div class="title"><a href="@{wlog_url}@{article['url']}.html">■ @{article['title']}</a></div>
-<div class="body">
 @{article['short']}
-</div>
 @if article['cut']:
-<div class="readmore"><a href="@{wlog_url}@{article['url']}.html">Read more...</a></div>
+<div class="readmore"><a href="@{wlog_url}@{article['url']}">Read more →</a></div>
 @endif
-<div class="off"><a href="@{wlog_url}@{article['url']}.html">Permalink</a> | @{article['time']}</div>
-</div>
-</div>
+<div class="off"><a href="@{wlog_url}@{article['url']}">Permalink</a> | @{article['time']}</div>
+</article>
 @endfor
 @end

@@ -1,31 +1,41 @@
-@require(title, version, categories, site_url, wlog_url)
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html><head>
+@require(title, description, image, version, site_url, wlog_url, wlog_via)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <title>@{title}</title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link href="/main.css" rel="stylesheet" type="text/css">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@{wlog_via}">
+<meta name="twitter:title" content="@{title}">
+<meta name="twitter:description" content="@{description}">
+@if image:
+<meta name="twitter:image" content="@{image}">
+@end
+<link href="/s/style.css" rel="stylesheet" type="text/css">
 </head>
-<body>
-<div class="k">
-
-<div class="head">
-<img src="/madotuki.png" />
-<h2 class="ico">wlog</h2>
-</div>
-<div class="head btn">
-[ <a href="@{site_url}">home</a> ] [ <a href="@{wlog_url}">wlog</a> ] //
-@for category in categories:
-[ <a href="@{wlog_url}cat/@{category}.html">@{category}</a> ]
-@endfor
-</div>
+<body class="wlog">
+<header>
+  <strong>オマエラ</strong>
+  wlog
+  <nav>[
+    <a href="/" class="home">home</a>
+    <a href="/notme" class="notme">not me</a>
+    <a href="/wlog/" class="s wlog">wlog</a>
+    <a href="/gal/" class="gal">gallery</a>
+    <a href="/server" class="server">server</a>
+    <a href="/scripts" class="scripts">scripts</a>
+    <a href="/links" class="links">links</a>
+  ]</nav>
+</header>
+<hr>
+<main>
 
 @def content():
 @end
 @content()
-
-<div class="foot">
-powered by <a href="https://github.com/z411/nikki">nikki</a> v@{version}<br />
-web@@omaera.org</div>
-</div>
+</main>
+<footer>
+  web ★ omaera · org
+</footer>
 </body>
 </html>
