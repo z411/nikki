@@ -6,7 +6,7 @@ WLOG_TITLE = 'wlog'
 WLOG_DESCRIPTION = 'Personal weblog for ramblings about tech and media.'
 WLOG_URL = 'https://omaera.org/wlog/'
 SITE_URL = '/'
-WLOG_VIA = 'z411_cl'
+WLOG_VIA = 'z411_'
 FORBIDDEN_CATEGORIES = ['img']
 
 import os
@@ -26,6 +26,16 @@ MAIN_CATEGORIES = []
 VERSION = "0.2"
 
 class NikkiRenderer(mistune.Renderer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.toc_entries = []
+
+    def header(self, text, level, raw=None):
+        anchor_id = re.sub(r'[\W_]+', '-', text.lower()).strip('-')
+        self.toc_entries.append({'id': anchor_id, 'text': text, 'level': level})
+        
+        return f'<h{level} id="{anchor_id}">{text}</h{level}>\n'
+
     def block_figure(self, text, caption):
         return '<figure><img src="%s" alt="%s"><figcaption>%s</figcaption></figure>\n' % (text, caption, caption)
 
