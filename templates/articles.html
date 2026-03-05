@@ -13,7 +13,7 @@
 @for article in articles:
 <article>
 <h1><a href="@{wlog_url}@{article['url']}">@{article['title']}</a></h1>
-<div class="tag">by z411 @ @{article['date_str']}
+<div class="tag">by <a href="@{article['author_url']}">@{article['author']}</a> @ @{article['date_str']}
 @if article['category']:
 <span style="float:right">[ <a href="@{wlog_url}@{article['category']}/">@{article['category']}</a> ]</span>
 @endif

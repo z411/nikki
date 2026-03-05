@@ -4,7 +4,9 @@
 # Configuration
 WLOG_TITLE = 'wlog'
 WLOG_DESCRIPTION = 'Personal weblog for ramblings about tech and media.'
-WLOG_URL = 'https://omaera.org/wlog/'
+WLOG_URL = '/wlog/'
+WLOG_AUTHOR = 'z411'
+WLOG_AUTHOR_URL = '/notme'
 SITE_URL = '/'
 WLOG_VIA = 'z411_'
 FORBIDDEN_CATEGORIES = ['img']
@@ -26,13 +28,17 @@ MAIN_CATEGORIES = []
 VERSION = "0.2"
 
 class NikkiRenderer(mistune.Renderer):
+    anchor_num = 1
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.toc_entries = []
 
     def header(self, text, level, raw=None):
         anchor_id = re.sub(r'[\W_]+', '-', text.lower()).strip('-')
+
         self.toc_entries.append({'id': anchor_id, 'text': text, 'level': level})
+        self.anchor_num += 1
         
         return f'<h{level} id="{anchor_id}">{text}</h{level}>\n'
 
@@ -65,6 +71,12 @@ def parse_articles():
   
   for root, dirs, files in os.walk("pages"):
     for name in files:
+      # ignore hidden and non-md files
+      if name.startswith(".") or not name.endswith(".md"):
+        continue
+
+      print(name)
+      
       # append article
       article = parse_page(os.path.join(root, name), markdown)
       article['fname'] = os.path.splitext(name)[0]
@@ -72,10 +84,10 @@ def parse_articles():
       # parse category and urls
       if os.path.split(root)[0]:
         article['category'] = os.path.split(root)[1]
-        article['url'] = '/'.join((article['category'], article['fname']))
+        article['url'] = '/'.join((article['category'], article['fname'] + ".html"))
       else:
         article['category'] = ''
-        article['url'] = article['fname']
+        article['url'] = article['fname'] + ".html"
       
       # create share links
       share_twitter_q = urllib.parse.urlencode({
@@ -106,7 +118,13 @@ def parse_date(str):
   return datetime.datetime.strptime(str, "%Y-%m-%d %H:%M")
   
 def parse_page(fname, markdown):
-  article = {'title': '', 'date': None, 'body': '', 'cut': False}
+  article = {'title': '',
+             'date': None,
+             'body': '',
+             'cut': False,
+             'author': WLOG_AUTHOR,
+             'author_url': WLOG_AUTHOR_URL}
+
   with open(fname) as f:
     line = f.readline().rstrip()
     while line != '':
@@ -121,6 +139,10 @@ def parse_page(fname, markdown):
         article['description'] = val
       elif cmd.lower() == 'image:':
         article['image'] = val
+      elif cmd.lower() == 'author:':
+        article['author'] = val
+      elif cmd.lower() == 'author_url:':
+        article['author_url'] = val
         
       line = f.readline().rstrip()
     
