@@ -26,8 +26,10 @@ import re
 from operator import itemgetter
 
 from wenmode import Wenmode, HTMLRenderer
-from wenmode.rules import AtxHeading
 from wenmode.plugins import heading_ids
+from wenmode.directives import Admonition
+from wenmode.presets import commonmark
+from wenmode.rules import ContainerDirective, LeafDirective, TextDirective
 
 from wheezy.template.engine import Engine
 from wheezy.template.ext.core import CoreExtension
@@ -36,11 +38,25 @@ from wheezy.template.loader import FileLoader
 MAIN_CATEGORIES = []
 VERSION = "0.4"
 
+class MyFigure:
+    node_type = "leafDirective"
+
+    def __init__(self, names: Iterable[str] = ('myFigure',)) -> None:
+        self.names = frozenset(names)
+
+    def render(self, renderer, node, context) -> str:
+        title = node.children[0].value
+        src = node.attributes['src']
+        return f"<figure><img src=\"{src}\"><figcaption>{title}</figcaption></figure>"
 
 def parse_articles():
   articles = []
 
-  wen = Wenmode(renderer=HTMLRenderer(escape=False), plugins=[heading_ids])
+  wen = Wenmode([*commonmark(), TextDirective, LeafDirective, ContainerDirective],
+                renderer=HTMLRenderer(escape=False),
+                plugins=[heading_ids],
+                directives=[MyFigure(), Admonition(names=['note', 'warn'])]
+            )
   
   for root, dirs, files in os.walk("pages"):
     for name in files:
