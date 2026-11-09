@@ -20,6 +20,7 @@ import re
 from operator import itemgetter
 
 import mistune
+from mistune.directives import RSTDirective, TableOfContents
 
 from wheezy.template.engine import Engine
 from wheezy.template.ext.core import CoreExtension
@@ -28,7 +29,8 @@ from wheezy.template.loader import FileLoader
 MAIN_CATEGORIES = []
 VERSION = "0.3"
 
-class NikkiRenderer(mistune.Renderer):
+"""
+class NikkiRenderer(mistune.HTMLRenderer):
     anchor_num = 1
 
     def __init__(self, **kwargs):
@@ -47,7 +49,7 @@ class NikkiRenderer(mistune.Renderer):
         return '<figure><img src="%s" alt="%s"><figcaption>%s</figcaption></figure>\n' % (text, caption, caption)
 
 
-class NikkiBlockLexer(mistune.BlockLexer):
+class NikkiBlockLexer(mistune.BlockParser):
     def enable_figure(self):
         self.rules.block_figure = re.compile(r'^\$\$(.*)\|(.*)\$\$')
         self.default_rules.insert(0, 'block_figure')
@@ -59,17 +61,24 @@ class NikkiBlockLexer(mistune.BlockLexer):
             'caption': m.group(2),
         })
 
+
 class NikkiMarkdown(mistune.Markdown):
     def output_block_figure(self):
         return self.renderer.block_figure(self.token['text'], self.token['caption'])
+"""
 
 def parse_articles():
   articles = []
 
-  renderer = NikkiRenderer()
-  block = NikkiBlockLexer()
-  block.enable_figure()
-  markdown = NikkiMarkdown(renderer, block=block)
+  #renderer = NikkiRenderer()
+  #block = NikkiBlockLexer()
+  #block.enable_figure()
+  #markdown = NikkiMarkdown(renderer, block=block)
+  markdown = mistune.create_markdown(escape=False,
+                                     plugins=['footnotes',
+                                              RSTDirective([TableOfContents()]),
+                                             ]
+                                    )
   
   for root, dirs, files in os.walk("pages"):
     for name in files:
