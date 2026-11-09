@@ -10,6 +10,7 @@ WLOG_AUTHOR_URL = '/notme'
 SITE_URL = '/'
 WLOG_VIA = 'z411_'
 FORBIDDEN_CATEGORIES = ['img']
+PRETTY_URLS = True
 
 import os
 import datetime
@@ -25,7 +26,7 @@ from wheezy.template.ext.core import CoreExtension
 from wheezy.template.loader import FileLoader
 
 MAIN_CATEGORIES = []
-VERSION = "0.2"
+VERSION = "0.3"
 
 class NikkiRenderer(mistune.Renderer):
     anchor_num = 1
@@ -44,6 +45,7 @@ class NikkiRenderer(mistune.Renderer):
 
     def block_figure(self, text, caption):
         return '<figure><img src="%s" alt="%s"><figcaption>%s</figcaption></figure>\n' % (text, caption, caption)
+
 
 class NikkiBlockLexer(mistune.BlockLexer):
     def enable_figure(self):
@@ -84,10 +86,13 @@ def parse_articles():
       # parse category and urls
       if os.path.split(root)[0]:
         article['category'] = os.path.split(root)[1]
-        article['url'] = '/'.join((article['category'], article['fname'] + ".html"))
+        article['url'] = '/'.join((article['category'], article['fname']))
       else:
         article['category'] = ''
-        article['url'] = article['fname'] + ".html"
+        article['url'] = article['fname']
+
+      if not PRETTY_URLS:
+        article['url'] += ".html"
       
       # create share links
       share_twitter_q = urllib.parse.urlencode({
