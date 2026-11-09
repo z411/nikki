@@ -3,6 +3,7 @@
 # requires-python = ">=3.14"
 # dependencies = [
 #     "wenmode>=0.15.3",
+#     "wheezy.template",
 # ]
 # ///
 
@@ -33,7 +34,7 @@ from wheezy.template.ext.core import CoreExtension
 from wheezy.template.loader import FileLoader
 
 MAIN_CATEGORIES = []
-VERSION = "0.3"
+VERSION = "0.4"
 
 
 def parse_articles():
