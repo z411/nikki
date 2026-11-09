@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-# -- coding: utf-8 --
+# /// script
+# requires-python = ">=3.14"
+# dependencies = [
+#     "wenmode>=0.15.3",
+# ]
+# ///
 
 # Configuration
 WLOG_TITLE = 'wlog'
@@ -19,8 +24,9 @@ import urllib
 import re
 from operator import itemgetter
 
-import mistune
-from mistune.directives import RSTDirective, TableOfContents
+from wenmode import Wenmode, HTMLRenderer
+from wenmode.rules import AtxHeading
+from wenmode.plugins import heading_ids
 
 from wheezy.template.engine import Engine
 from wheezy.template.ext.core import CoreExtension
@@ -29,56 +35,11 @@ from wheezy.template.loader import FileLoader
 MAIN_CATEGORIES = []
 VERSION = "0.3"
 
-"""
-class NikkiRenderer(mistune.HTMLRenderer):
-    anchor_num = 1
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.toc_entries = []
-
-    def header(self, text, level, raw=None):
-        anchor_id = re.sub(r'[\W_]+', '-', text.lower()).strip('-')
-
-        self.toc_entries.append({'id': anchor_id, 'text': text, 'level': level})
-        self.anchor_num += 1
-        
-        return f'<h{level} id="{anchor_id}">{text}</h{level}>\n'
-
-    def block_figure(self, text, caption):
-        return '<figure><img src="%s" alt="%s"><figcaption>%s</figcaption></figure>\n' % (text, caption, caption)
-
-
-class NikkiBlockLexer(mistune.BlockParser):
-    def enable_figure(self):
-        self.rules.block_figure = re.compile(r'^\$\$(.*)\|(.*)\$\$')
-        self.default_rules.insert(0, 'block_figure')
-
-    def parse_block_figure(self, m):
-        self.tokens.append({
-            'type': 'block_figure',
-            'text': m.group(1),
-            'caption': m.group(2),
-        })
-
-
-class NikkiMarkdown(mistune.Markdown):
-    def output_block_figure(self):
-        return self.renderer.block_figure(self.token['text'], self.token['caption'])
-"""
 
 def parse_articles():
   articles = []
 
-  #renderer = NikkiRenderer()
-  #block = NikkiBlockLexer()
-  #block.enable_figure()
-  #markdown = NikkiMarkdown(renderer, block=block)
-  markdown = mistune.create_markdown(escape=False,
-                                     plugins=['footnotes',
-                                              RSTDirective([TableOfContents()]),
-                                             ]
-                                    )
+  wen = Wenmode(renderer=HTMLRenderer(escape=False), plugins=[heading_ids])
   
   for root, dirs, files in os.walk("pages"):
     for name in files:
@@ -89,7 +50,7 @@ def parse_articles():
       print(name)
       
       # append article
-      article = parse_page(os.path.join(root, name), markdown)
+      article = parse_page(os.path.join(root, name), wen)
       article['fname'] = os.path.splitext(name)[0]
 
       # parse category and urls
@@ -131,7 +92,7 @@ def split_categories(articles):
 def parse_date(str):
   return datetime.datetime.strptime(str, "%Y-%m-%d %H:%M")
   
-def parse_page(fname, markdown):
+def parse_page(fname, wen):
   article = {'title': '',
              'date': None,
              'body': '',
@@ -164,11 +125,11 @@ def parse_page(fname, markdown):
     (shorted, sep, rest) = body.partition('---CUT---')
     article['cut'] = bool(sep)
     
-    article['body'] = markdown(body.replace('---CUT---', ''))
+    article['body'] = wen.render(body.replace('---CUT---', ''))
     
     if article['cut']:
       shorted = re.sub(r"\[\^.*\]", "", shorted)
-      article['short'] = markdown(shorted)
+      article['short'] = wen.render(shorted)
     else:
       article['short'] = article['body']
     
