@@ -1,6 +1,9 @@
 # nikki
 Simple static blog generator written in Python. It takes files written in Markdown and generates a static blog with it. It's currently under development.
 
+> [!IMPORTANT]
+> This program has been rewritten into Go. You can check the repository [here](https://github.com/z411/nikki-go).
+
 ## Requirements:
 * Python 2 or 3
 * Mistune
