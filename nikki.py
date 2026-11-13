@@ -2,8 +2,9 @@
 # /// script
 # requires-python = ">=3.14"
 # dependencies = [
-#     "wenmode>=0.15.3",
+#     "mistune>=3",
 #     "wheezy.template",
+#     "pygments",
 # ]
 # ///
 
@@ -25,11 +26,14 @@ import urllib
 import re
 from operator import itemgetter
 
-from wenmode import Wenmode, HTMLRenderer
-from wenmode.plugins import heading_ids
-from wenmode.directives import Admonition
-from wenmode.presets import commonmark
-from wenmode.rules import ContainerDirective, LeafDirective, TextDirective
+import mistune
+from mistune.toc import add_toc_hook
+from mistune.directives import FencedDirective, Image, Figure
+from overrides.admonition import Admonition
+
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name
+from pygments.formatters import html
 
 from wheezy.template.engine import Engine
 from wheezy.template.ext.core import CoreExtension
@@ -38,25 +42,31 @@ from wheezy.template.loader import FileLoader
 MAIN_CATEGORIES = []
 VERSION = "0.4"
 
-class MyFigure:
-    node_type = "leafDirective"
+class HighlightRenderer(mistune.HTMLRenderer):
+  def block_code(self, code, info=None):
+    if info:
+      lang = info.split(None, 1)[0]
+      lexer = get_lexer_by_name(lang, stripall=True)
+      formatter = html.HtmlFormatter()
+      return highlight(code, lexer, formatter)
+    return '<pre><code>' + mistune.escape(code) + '</code></pre>'
 
-    def __init__(self, names: Iterable[str] = ('myFigure',)) -> None:
-        self.names = frozenset(names)
-
-    def render(self, renderer, node, context) -> str:
-        title = node.children[0].value
-        src = node.attributes['src']
-        return f"<figure><img src=\"{src}\"><figcaption>{title}</figcaption></figure>"
-
+def slug(token, index):
+  text = token.get("text", "")
+  return re.sub(r'[\W_]+', '-', text.lower()).strip('-')
+  
 def parse_articles():
   articles = []
 
-  wen = Wenmode([*commonmark(), TextDirective, LeafDirective, ContainerDirective],
-                renderer=HTMLRenderer(escape=False),
-                plugins=[heading_ids],
-                directives=[MyFigure(), Admonition(names=['note', 'warn'])]
-            )
+  md = mistune.create_markdown(escape=False,
+                               renderer=HighlightRenderer(),
+                               plugins=[
+    'footnotes',
+    FencedDirective([
+      Admonition(), Image(), Figure(),
+    ]),
+  ])
+  add_toc_hook(md, heading_id=slug)
   
   for root, dirs, files in os.walk("pages"):
     for name in files:
@@ -67,7 +77,7 @@ def parse_articles():
       print(name)
       
       # append article
-      article = parse_page(os.path.join(root, name), wen)
+      article = parse_page(os.path.join(root, name), md)
       article['fname'] = os.path.splitext(name)[0]
 
       # parse category and urls
@@ -109,7 +119,7 @@ def split_categories(articles):
 def parse_date(str):
   return datetime.datetime.strptime(str, "%Y-%m-%d %H:%M")
   
-def parse_page(fname, wen):
+def parse_page(fname, md):
   article = {'title': '',
              'date': None,
              'body': '',
@@ -142,11 +152,11 @@ def parse_page(fname, wen):
     (shorted, sep, rest) = body.partition('---CUT---')
     article['cut'] = bool(sep)
     
-    article['body'] = wen.render(body.replace('---CUT---', ''))
+    article['body'] = md(body.replace('---CUT---', ''))
     
     if article['cut']:
       shorted = re.sub(r"\[\^.*\]", "", shorted)
-      article['short'] = wen.render(shorted)
+      article['short'] = md(shorted)
     else:
       article['short'] = article['body']
     
